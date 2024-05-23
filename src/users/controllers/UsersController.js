@@ -2,83 +2,54 @@ const UsersService = require("../services/UsersService");
 
 class UsersController {
     async createUser(req, res) {
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        req.on('end', async () => {
-            try {
-                const userData = JSON.parse(body);
-                const result = await UsersService.createUser(userData);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(result));
-            } catch (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: err.message }));
-            }
-        });
-    };
-    async deleteUser(req, res, match) {
-        const userId = match[1];
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        req.on('end', async () => {
-            try {
-                const result = await UsersService.deleteUser(userId);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(result));
-            } catch (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: err.message }));
-            }
-        });
-    };
-    async getAllUsers(res) {
         try {
-            const data = await UsersService.getAllUsers();
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(data));
+            const result = await UsersService.createUser(req.body);
+            res.json(result)
         } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: err.message }));
+            res.status(500).json({ error: err.message })
         }
     };
-    async getUser(res, match) {
-        const userId = match[1];
+    async deleteUser(req, res) {
+        const userId = req.params.id;
+        try {
+            const result = await UsersService.deleteUser(userId);
+            return res.json(result)
+        } catch (err) {
+            res.status(500).json({ error: err.message })
+        }
+    };
+    async getAllUsers(_, res) {
+        try {
+            const data = await UsersService.getAllUsers();
+            return res.json(data)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    };
+    async getUser(req, res) {
+        const userId = req.params.id;
         try {
             const data = await UsersService.getUser(userId);
             if (data) {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(data));
+                return res.json(data)
             } else {
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'User not found' }));
+                res.status(404).json({ error: 'User not found' })
             }
         } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: err.message }));
+            res.status(500).json({ error: err.message })
         }
 
     }
-    async updateUser(req, res, match) {
-        const userId = match[1];
-        let body = '';
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        req.on('end', async () => {
-            try {
-                const userData = { ...JSON.parse(body), id: userId };
-                const result = await UsersService.updateUser(userData);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(result));
-            } catch (err) {
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: err.message }));
-            }
-        });
+    async updateUser(req, res) {
+        const userId = req.params.id;
+        const body = { id: userId, ...req.body }
+
+        try {
+            const result = await UsersService.updateUser(body);
+            res.json(result)
+        } catch (err) {
+            res.status(500).json({ error: err.message })
+        }
     }
 
 }

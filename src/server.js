@@ -1,22 +1,14 @@
-const http = require('http');
-const usersRoutes = require('./users/routes/usersRoutes');
+const express = require('express');
+const usersRouter = require('./users/routes/UsersRoutes');
 
 function server() {
     const PORT = 3000;
-    const ADDRESS = '127.0.0.1';
-    const server = http.createServer(async (req, res) => {
-        const url = req.url
-        if (url.startsWith('/users')) {
-            usersRoutes(req, res)
-        } else {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Not Found' }));
-        }
-    });
+    const HOST = '127.0.0.1';
 
-    server.listen(PORT, ADDRESS, () => {
-        console.log(`Listening on ${ADDRESS}:${PORT}`);
-    });
+    const app = express()
+    app.use(express.json())
+    app.use('/users', usersRouter)
+    app.listen(PORT, HOST, () => console.log(`Listening on ${HOST}:${PORT}`))
 }
 
 module.exports = server
